@@ -1,4 +1,9 @@
-#pragma once
+/*
+
+*/
+#ifndef Entity_hpp
+#define Entity_hpp
+
 #include "chai3d.h"
 #include <GLFW/glfw3.h>
 
@@ -23,3 +28,4 @@ public:
 	~Entity();
 };
 
+#endif /* Entity_hpp */

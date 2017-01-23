@@ -1,6 +1,8 @@
-#include "Sphere.h"
+/*
+  
+ */
 
-
+#include "Sphere.hpp"
 
 Sphere::Sphere(chai3d::cVector3d position, double r, double s) : Entity(s)
 {
@@ -32,7 +34,6 @@ chai3d::cVector3d Sphere::calculateAppliedForce(chai3d::cVector3d cPosition, dou
 			force2 += force2 * -300 * (distance.length() - 2 * radius + cRadius);
 		}
 	}
-
 
 	return force1 + force2;
 }

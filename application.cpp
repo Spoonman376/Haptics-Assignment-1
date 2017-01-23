@@ -9,7 +9,9 @@
 //------------------------------------------------------------------------------
 #include <GLFW/glfw3.h>
 
-#include "Sphere.h"
+#include "Sphere.hpp"
+#include "box.hpp"
+
 
 //------------------------------------------------------------------------------
 using namespace chai3d;
@@ -93,6 +95,7 @@ int swapInterval = 1;
 
 
 Sphere* sphere;
+Box* box;
 
 
 
@@ -263,7 +266,7 @@ int main(int argc, char* argv[])
     light->setEnabled(true);
 
     // define direction of light beam
-    light->setDir(-1.0, 0.0, 0.0); 
+    light->setDir(-1.0, -0.5, 0.0); 
 
     // create a sphere (cursor) to represent the haptic device
     cursor = new cShapeSphere(0.01);
@@ -271,9 +274,14 @@ int main(int argc, char* argv[])
     // insert cursor inside world
     world->addChild(cursor);
 
-	sphere = new Sphere(chai3d::cVector3d(0, 0, 0), 0.015, 3000);
+	sphere = new Sphere(chai3d::cVector3d(0, 0, 0.03), 0.015, 3000);
 	sphere->type = magnetic;
 	world->addChild(sphere->mesh);
+
+  box = new Box(chai3d::cVector3d(0, 0, 0), 0.04, 0.04, 0.04, 3000);
+  box->mesh->m_material->setBlueRoyal();
+  world->addChild(box->mesh);
+
 
     //--------------------------------------------------------------------------
     // HAPTIC DEVICE

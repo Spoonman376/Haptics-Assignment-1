@@ -1,17 +1,13 @@
-//
-//  Box.hpp
-//  
-//
-//  Created by Erik Spooner on 2017-01-17.
-//
-//
+/*
+
+*/
 
 #ifndef Box_hpp
 #define Box_hpp
 
 #include <stdio.h>
-#include "Point.hpp"
 #include "Entity.hpp"
+
 
 enum DirectionEntered
 {
@@ -33,12 +29,12 @@ public:
   
   DirectionEntered directionEntered;
   
-  Box(double centerPoint, double frontDistance, double topDistance, double rightDistance, double s);
+  Box(chai3d::cVector3d centerPoint, double xDistance, double yDistance, double zDistance, double s);
   Box(chai3d::cVector3d a, chai3d::cVector3d b, double s);
   ~Box();
 
   chai3d::cVector3d calculateAppliedForce(chai3d::cVector3d cursorPosition, double cursorRadius);
-  chai3d::cVector3d forceApplied(chai3d::cVector3d cursorPosition, double cursorRadius, chai3d::cVector3d pointLess, chai3d::cVector3d, pointGreater, chai3d::cVector3d normal);
+  chai3d::cVector3d forceApplied(chai3d::cVector3d cursorPosition, double cursorRadius, chai3d::cVector3d pointLess, chai3d::cVector3d pointGreater, chai3d::cVector3d normal);
   
 private:
   

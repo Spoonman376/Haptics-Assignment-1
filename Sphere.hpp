@@ -1,5 +1,10 @@
-#pragma once
-#include "Entity.h"
+/*
+
+*/
+#ifndef Sphere_hpp
+#define Sphere_hpp
+
+#include "Entity.hpp"
 
 class Sphere : public Entity
 {
@@ -14,3 +19,4 @@ public:
 	~Sphere();
 };
 
+#endif /* Sphere_hpp */
