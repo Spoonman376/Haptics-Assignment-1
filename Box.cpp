@@ -20,80 +20,25 @@ chai3d::cVector3d Box::calculateAppliedForce(chai3d::cVector3d cursorPosition, d
   // Based on which wall that the cursor has entered the box set the lesser point, greater point and the normal
   if (directionEntered != notEntered) {
     Wall wall = Wall(pointLFB, pointRBT, directionEntered);
-    return forceApplied(cursorPosition, cursorRadius, wall.pointLesser, wall.pointGreater, wall.normal);
+    return forceApplied(cursorPosition, cursorRadius, wall);
   }
   else {
     return chai3d::cVector3d(0,0,0);
   }
 }
 
-// Need to implement ----------------------------------------------------------------------------
-DirectionEntered Box::checkIntersection(chai3d::cVector3d cursorPosition, double cursorRadius)
+
+double Box::intersectsWithWall(chai3d::cVector3d cursorPosition, double cursorRadius, Wall wall)
 {
-  
-  DirectionEntered direction;
-  
-  chai3d::cVector3d left, right, front, back, top, bottom;
-  
-  double x = pointRBT(0)/2;
-  double y = pointRBT(1)/2;
-  double z = pointRBT(2)/2;
-  
-  std::vector<chai3d::cVector3d> wallCenterPoints (6);
-  
-  // Left and right walls
-  wallCenterPoints.push_back(pointLFB + chai3d::cVector3d(0, y, z));
-  wallCenterPoints.push_back(pointLFB + chai3d::cVector3d(2 * x, y, z));
-  
-  // front and back walls
-  wallCenterPoints.push_back(pointLFB + chai3d::cVector3d(x, 0, z));
-  wallCenterPoints.push_back(pointLFB + chai3d::cVector3d(x, 2 * y, z));
-
-  // bottom and top walls
-  wallCenterPoints.push_back(pointLFB + chai3d::cVector3d(x, y, 0));
-  wallCenterPoints.push_back(pointLFB + chai3d::cVector3d(x, y, 2 * z));
-  
-  double distance = MAX_FLOAT;
-  
-  for (int i = 0; i < 6, ++i) {
-    chai3d::cVector3d d = wallCenterPoints(i) - cursorPosition;
-    
-    if (d.length() < distance) {
-      direction = i;
-      distance = d.length();
-    }
-  }
-  
-  Wall wall = Wall(pointLFB, pointRBT, directionEntered);
-  
-  
-
-  return DirectionEntered::notEntered;
-}
-
-
-bool
-
-
-
-/* We know that the box and the cursor intersect with eachother so now calculate the force applied to the cursor
- * We know which wall the the cursor entered the box from 
- * We treat the wall as a plane where the normal is the direction that the wall applies force in.
- * 
- * The sparate x,y,z values for pointLesser < pointGreater
- */
-chai3d::cVector3d Box::forceApplied(chai3d::cVector3d cursorPosition, double cursorRadius, chai3d::cVector3d pointLesser, chai3d::cVector3d pointGreater, chai3d::cVector3d normal)
-{
-  
-  std::vector<int> hAndV (2);
+  std::vector<int> hAndV(2);
 
   // We reorinentate so that we treat h, v, and n as the indices of the horizontal, vertical, and normal axies respectively  
   int n;
   int h;
   int v;
-  
+
   for (int i = 0; i < 2; ++i) {
-    if (normal(i) != 0) {
+    if (wall.normal(i) != 0) {
       n = i;
     }
     else {
@@ -103,70 +48,81 @@ chai3d::cVector3d Box::forceApplied(chai3d::cVector3d cursorPosition, double cur
 
   h = hAndV[0];
   v = hAndV[1];
-  
+
   // fin out if the center of the cursor is above or below the wall on the vertical axis
-  bool below = cursorPosition(v) < pointLesser(v);
-  bool above = cursorPosition(v) > pointGreater(v);
+  bool below = cursorPosition(v) < wall.pointLesser(v);
+  bool above = cursorPosition(v) > wall.pointGreater(v);
 
   // find out if the center of the cursor is to the left or the right of the wall on the horizontal axis
-  bool leftOf = cursorPosition(h) < pointLesser(h);
-  bool rightOf = cursorPosition(h) > pointGreater(h);
+  bool leftOf = cursorPosition(h) < wall.pointLesser(h);
+  bool rightOf = cursorPosition(h) > wall.pointGreater(h);
 
   // Find the horizontal and vertical distances from the lesser point to the cursor position
-  double distLH = pointLesser(h) - cursorPosition(h);
-  double distLV = pointLesser(v) - cursorPosition(v);
+  double distLH = wall.pointLesser(h) - cursorPosition(h);
+  double distLV = wall.pointLesser(v) - cursorPosition(v);
 
   // Find the horizontal and vertical distances from the greater point to the cursor position
-  double distGH = pointGreater(h) - cursorPosition(h);
-  double distGV = pointGreater(v) - cursorPosition(v);
+  double distGH = wall.pointGreater(h) - cursorPosition(h);
+  double distGV = wall.pointGreater(v) - cursorPosition(v);
 
-  // 
   double distanceIn = 0;
 
   // To the left and below
-  if(leftOf && below) {
+  if (leftOf && below && cursorRadius * cursorRadius - distLH * distLH - distLV * distLV > 0) {
     distanceIn = sqrt(cursorRadius * cursorRadius - distLH * distLH - distLV * distLV);
   }
   // In the middle and below
-  else if(!leftOf && !rightOf && below) {
+  else if (!leftOf && !rightOf && below && cursorRadius * cursorRadius - distLV * distLV > 0) {
     distanceIn = sqrt(cursorRadius * cursorRadius - distLV * distLV);
   }
   // To the right and below
-  else if(rightOf && below) {
+  else if (rightOf && below && cursorRadius * cursorRadius - distGH * distGH - distLV * distLV > 0) {
     distanceIn = sqrt(cursorRadius * cursorRadius - distGH * distGH - distLV * distLV);
   }
   // To the left and in the middle
-  else if(leftOf && !below && !above) {
+  else if (leftOf && !below && !above && cursorRadius * cursorRadius - distLH * distLH > 0) {
     distanceIn = sqrt(cursorRadius * cursorRadius - distLH * distLH);
   }
   // In the middle
-  else if(!leftOf && !rightOf && !below && !above) {
+  else if (!leftOf && !rightOf && !below && !above) {
     distanceIn = cursorRadius;
   }
   // To the right and in the middle
-  else if(rightOf && !below && !above) {
+  else if (rightOf && !below && !above && cursorRadius * cursorRadius - distGH * distGH > 0) {
     distanceIn = sqrt(cursorRadius * cursorRadius - distGH * distGH);
   }
   // To the left and above
-  else if(leftOf && above) {
+  else if (leftOf && above && cursorRadius * cursorRadius - distLH * distLH - distGV * distGV > 0) {
     distanceIn = sqrt(cursorRadius * cursorRadius - distLH * distLH - distGV * distGV);
   }
   // In the middle and above
-  else if(!leftOf && !rightOf && above) {
+  else if (!leftOf && !rightOf && above && cursorRadius * cursorRadius - distGV * distGV > 0) {
     distanceIn = sqrt(cursorRadius * cursorRadius - distGV * distGV);
   }
   // To the right and above
-  else if(rightOf && above) {
+  else if (rightOf && above && cursorRadius * cursorRadius - distGH * distGH - distGV * distGV > 0) {
     distanceIn = sqrt(cursorRadius * cursorRadius - distGH * distGH - distGV * distGV);
   }
 
-  
-  // This might be wrong ---------------------------------------------------
-  // Fix the distance in
-  distanceIn = cursorPosition(n) - distanceIn * normal(n) - pointLesser(n);
-  
-  if (distanceIn > 0) {
-    return normal * distanceIn * stiffness;
+  distanceIn = cursorPosition(n) - distanceIn * wall.normal(n) - wall.pointLesser(n);
+
+  return distanceIn;
+}
+
+
+
+/* We know that the box and the cursor intersect with eachother so now calculate the force applied to the cursor
+ * We know which wall the the cursor entered the box from 
+ * We treat the wall as a plane where the normal is the direction that the wall applies force in.
+ * 
+ * The sparate x,y,z values for pointLesser < pointGreater
+ */
+chai3d::cVector3d Box::forceApplied(chai3d::cVector3d cursorPosition, double cursorRadius, Wall wall)
+{
+  double distance = intersectsWithWall(cursorPosition, cursorRadius, wall);
+
+  if (distance > 0) {
+    return wall.normal * distance * stiffness;
   }
   else {
     return chai3d::cVector3d(0,0,0);
@@ -201,41 +157,42 @@ Box::Box(chai3d::cVector3d cp, double x, double y, double z, double s) : Entity(
 Wall::Wall(chai3d::cVector3d pointLFB, chai3d::cVector3d pointRBT, DirectionEntered d)
 {
   switch (d) {
-    case left:
-      pointLesser = pointLFB;
-      pointGreater = pointLFB + chai3d::cVector3d(0,pointRBT(1),pointRBT(2));
-      normal = chai3d::cVector3d(-1,0,0);
-      break;
-      
-    case right:
-      pointLesser = pointLFB + chai3d::cVector3d(pointRBT(0),0,0);
-      pointGreater = pointLFB + pointRBT;
-      normal = chai3d::cVector3d(1,0,0);
-      break;
-      
-    case front:
-      pointLesser = pointLFB;
-      pointGreater = pointLFB + chai3d::cVector3d(pointRBT(0), 0, pointRBT(2));
-      normal = chai3d::cVector3d(0,-1,0);
-      break;
-      
-    case back:
-      pointLesser = pointLFB + chai3d::cVector3d(0,pointRBT(1),0);
-      pointGreater = pointLFB + pointRBT;
-      normal = chai3d::cVector3d(0,1,0);
-      break;
-      
-    case bottom:
-      pointLesser = pointLFB;
-      pointGreater = pointLFB + chai3d::cVector3d(pointRBT(0), pointRBT(1), 0);
-      normal = chai3d::cVector3d(0,0,-1);
-      break;
-      
-    case top:
-      pointLesser = pointLFB + chai3d::cVector3d(0,0,pointRBT(2));
-      pointGreater = pointLFB + pointRBT;
-      normal = chai3d::cVector3d(0,0,1);
-      break;
+  case left:
+    pointLesser = pointLFB;
+    pointGreater = pointLFB + chai3d::cVector3d(0, pointRBT(1), pointRBT(2));
+    normal = chai3d::cVector3d(-1, 0, 0);
+    break;
+
+  case right:
+    pointLesser = pointLFB + chai3d::cVector3d(pointRBT(0), 0, 0);
+    pointGreater = pointLFB + pointRBT;
+    normal = chai3d::cVector3d(1, 0, 0);
+    break;
+
+  case front:
+    pointLesser = pointLFB;
+    pointGreater = pointLFB + chai3d::cVector3d(pointRBT(0), 0, pointRBT(2));
+    normal = chai3d::cVector3d(0, -1, 0);
+    break;
+
+  case back:
+    pointLesser = pointLFB + chai3d::cVector3d(0, pointRBT(1), 0);
+    pointGreater = pointLFB + pointRBT;
+    normal = chai3d::cVector3d(0, 1, 0);
+    break;
+
+  case bottom:
+    pointLesser = pointLFB;
+    pointGreater = pointLFB + chai3d::cVector3d(pointRBT(0), pointRBT(1), 0);
+    normal = chai3d::cVector3d(0, 0, -1);
+    break;
+
+  case top:
+    pointLesser = pointLFB + chai3d::cVector3d(0, 0, pointRBT(2));
+    pointGreater = pointLFB + pointRBT;
+    normal = chai3d::cVector3d(0, 0, 1);
+    break;
+  }
 }
 
 
