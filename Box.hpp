@@ -24,6 +24,10 @@ public:
   chai3d::cVector3d pointGreater;
   chai3d::cVector3d normal;
 
+  int n;
+  int h;
+  int v;
+
   Wall(chai3d::cVector3d, chai3d::cVector3d, DirectionEntered);
 };
 
@@ -37,7 +41,7 @@ public:
   // This is a vector from the left front bottom corner to the right back top corner
   chai3d::cVector3d pointRBT;
   
-  DirectionEntered directionEntered;
+  DirectionEntered directionEntered = notEntered;
   
   Box(chai3d::cVector3d centerPoint, double xDistance, double yDistance, double zDistance, double s);
   Box(chai3d::cVector3d a, chai3d::cVector3d b, double s);

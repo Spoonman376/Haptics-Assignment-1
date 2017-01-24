@@ -547,8 +547,12 @@ void updateHaptics(void)
         cVector3d torque(0, 0, 0);
         double gripperForce = 0.0;
 
-		force = sphere->calculateAppliedForce(position, 0.01);
+        position.set(0, 1, 0);
 
+//		    force = sphere->calculateAppliedForce(position, 0.01);
+        force += box->calculateAppliedForce(position, 0.01);
+
+        cout << "Force " << force << endl;
 
         /////////////////////////////////////////////////////////////////////
         // APPLY FORCES
