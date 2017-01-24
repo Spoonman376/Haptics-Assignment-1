@@ -13,7 +13,7 @@ enum DirectionEntered
 {
   left, right,
   front, back,
-  top, bottom,
+  bottom, top,
   notEntered
 };
 
@@ -34,11 +34,24 @@ public:
   ~Box();
 
   chai3d::cVector3d calculateAppliedForce(chai3d::cVector3d cursorPosition, double cursorRadius);
-  chai3d::cVector3d forceApplied(chai3d::cVector3d cursorPosition, double cursorRadius, chai3d::cVector3d pointLess, chai3d::cVector3d pointGreater, chai3d::cVector3d normal);
   
 private:
   
+  chai3d::cVector3d forceApplied(chai3d::cVector3d cursorPosition, double cursorRadius, chai3d::cVector3d pointLesser, chai3d::cVector3d pointGreater, chai3d::cVector3d normal);
   DirectionEntered checkIntersection(chai3d::cVector3d cursorPosition, double cursorRadius);
+  bool intersectsWithWall(chai3d::cVector3d cursorPosition, double cursorRadius);
+};
+
+
+struct Wall
+{
+public:
+  chai3d::cVector3d pointLesser;
+  chai3d::cVector3d pointGreater;
+  chai3d::cVector3d normal;
+  
+  Wall(DirectionEntered d);
+  
 };
 
 
