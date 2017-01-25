@@ -160,19 +160,19 @@ Box::Box(chai3d::cVector3d a, chai3d::cVector3d b, double s) : Entity(s)
   pointLFB = a;
   pointRBT = b;
 
-  chai3d::cVector3d cp = a + (b / 2);
+  chai3d::cVector3d cp =  a + (b / 2);
   double x = b(0);
   double y = b(1);
   double z = b(2);
 
-  chai3d::cCreateBox(mesh, x, y, z, pointLFB, chai3d::cIdentity3d(), chai3d::cColorf(1,1,0,1));
+  chai3d::cCreateBox(mesh, x, y, z, cp, chai3d::cIdentity3d(), chai3d::cColorf(1,1,0,1));
 }
 
 //
 Box::Box(chai3d::cVector3d cp, double x, double y, double z, double s) : Entity(s)
 {
   pointLFB = cp - chai3d::cVector3d(x, y, z);
-  pointRBT = 2 * chai3d::cVector3d(x, y, z);
+  pointRBT = chai3d::cVector3d(x, y, z);
 
   chai3d::cCreateBox(mesh, x, y, z, cp, chai3d::cIdentity3d(), chai3d::cColorf(0, 0, 0, 0));
 }
