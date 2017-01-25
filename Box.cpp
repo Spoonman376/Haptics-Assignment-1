@@ -12,11 +12,6 @@ chai3d::cVector3d Box::calculateAppliedForce(chai3d::cVector3d cursorPosition, d
     directionEntered = direction;
   }
   
-  // The sparate x, y, z values for pointLesser < pointGreater
-  chai3d::cVector3d pointLesser;
-  chai3d::cVector3d pointGreater;
-  chai3d::cVector3d normal;
-
   // Based on which wall that the cursor has entered the box set the lesser point, greater point and the normal
   if (directionEntered != notEntered) {
     Wall wall = Wall(pointLFB, pointRBT, directionEntered);
@@ -93,7 +88,7 @@ double Box::intersectsWithWall(chai3d::cVector3d cursorPosition, double cursorRa
     distanceIn = sqrt(cursorRadius * cursorRadius - distGH * distGH - distGV * distGV);
   }
 
-  distanceIn = cursorPosition(n) - distanceIn * wall.normal(n) - wall.pointLesser(n);
+  distanceIn = (cursorPosition(n) - distanceIn * wall.normal(n) - wall.pointLesser(n)) * (-wall.normal(n));
 
   return distanceIn;
 }
@@ -102,8 +97,6 @@ DirectionEntered Box::checkIntersection(chai3d::cVector3d cursorPosition, double
 {
 
   DirectionEntered direction = notEntered;
-
-  chai3d::cVector3d left, right, front, back, top, bottom;
 
   double x = pointRBT(0) / 2;
   double y = pointRBT(1) / 2;
@@ -179,7 +172,7 @@ Box::Box(chai3d::cVector3d a, chai3d::cVector3d b, double s) : Entity(s)
 Box::Box(chai3d::cVector3d cp, double x, double y, double z, double s) : Entity(s)
 {
   pointLFB = cp - chai3d::cVector3d(x, y, z);
-  pointRBT = cp + chai3d::cVector3d(x, y, z);
+  pointRBT = 2 * chai3d::cVector3d(x, y, z);
 
   chai3d::cCreateBox(mesh, x, y, z, cp, chai3d::cIdentity3d(), chai3d::cColorf(0, 0, 0, 0));
 }
