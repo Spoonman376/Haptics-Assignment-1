@@ -12,13 +12,11 @@ Entity::Entity(double stiff)
 	stiffness = stiff;
 }
 
-chai3d::cVector3d Entity::calculateAppliedForce(float cPosition, float cRadius)
-{
-	return chai3d::cVector3d();
-}
 
 
 Entity::~Entity()
 {
-
+  if (mesh != nullptr)
+    delete mesh;
 }
+
