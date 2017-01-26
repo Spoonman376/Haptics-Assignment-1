@@ -24,7 +24,6 @@ chai3d::cVector3d Sphere::calculateAppliedForce(chai3d::cVector3d cPosition, dou
 		force = force * stiffness * (radius + cRadius - distance.length());
 	}
 	
-
 	return force;
 }
 

@@ -281,6 +281,8 @@ int main(int argc, char* argv[])
   box->mesh->m_material->setBlueRoyal();
   world->addChild(box->mesh);
 
+  
+
 
     //--------------------------------------------------------------------------
     // HAPTIC DEVICE

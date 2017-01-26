@@ -16,7 +16,9 @@ public:
 	chai3d::cMesh* mesh;
 	double stiffness; // N/m
 
-	virtual chai3d::cVector3d calculateAppliedForce(chai3d::cVector3d cPosition, float cRadius) = 0;
+  virtual chai3d::cVector3d calculateAppliedForce(chai3d::cVector3d cPosition, float cRadius);
+
+  void addToWorld(chai3d::cWorld* world);
 
 	Entity(double stiff);
 	~Entity();
