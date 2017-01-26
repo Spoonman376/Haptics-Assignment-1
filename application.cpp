@@ -239,7 +239,7 @@ int main(int argc, char* argv[])
     world->addChild(camera);
 
     // position and orient the camera
-    camera->set( cVector3d (0.2, 0.05, 0.0),    // camera position (eye)
+    camera->set( cVector3d (0.2, 0.1, 0.1),    // camera position (eye)
                  cVector3d (0.0, 0.0, 0.0),    // look at position (target)
                  cVector3d (0.0, 0.0, 1.0));   // direction of the (up) vector
 
@@ -275,7 +275,6 @@ int main(int argc, char* argv[])
     world->addChild(cursor);
 
 	sphere = new Sphere(chai3d::cVector3d(0, 0, 0.03), 0.015, 3000);
-	sphere->type = magnetic;
 	world->addChild(sphere->mesh);
 
   box = new Box(chai3d::cVector3d(-0.02, -0.02, -0.02), chai3d::cVector3d(0.04, 0.04, 0.04), 3000);
@@ -531,27 +530,19 @@ void updateHaptics(void)
         hapticDevice->getUserSwitch(0, button);
 
 
-        /////////////////////////////////////////////////////////////////////
-        // UPDATE 3D CURSOR MODEL
-        /////////////////////////////////////////////////////////////////////
-
         // update position and orienation of cursor
+
         cursor->setLocalPos(position);
         cursor->setLocalRot(rotation);
 
-        /////////////////////////////////////////////////////////////////////
-        // COMPUTE FORCES
-        /////////////////////////////////////////////////////////////////////
 
         cVector3d force(0, 0, 0);
         cVector3d torque(0, 0, 0);
         double gripperForce = 0.0;
-        
-        cursor->setLocalPos(chai3d::cVector3d(0, 0, 0));
 
-        force += box->calculateAppliedForce(cursor->getLocalPos(), 0.01);
+        force += box->calculateAppliedForce(position, 0.01);
+        force += sphere->calculateAppliedForce(position, 0.01);
 
-        cout << "Force " << force << endl;
 
         /////////////////////////////////////////////////////////////////////
         // APPLY FORCES

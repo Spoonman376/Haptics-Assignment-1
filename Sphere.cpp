@@ -13,29 +13,19 @@ Sphere::Sphere(chai3d::cVector3d position, double r, double s) : Entity(s)
 
 chai3d::cVector3d Sphere::calculateAppliedForce(chai3d::cVector3d cPosition, double cRadius)
 {
-	chai3d::cVector3d force1 = chai3d::cVector3d(0, 0, 0);
-	chai3d::cVector3d force2 = chai3d::cVector3d(0, 0, 0);
+	chai3d::cVector3d force = chai3d::cVector3d(0, 0, 0);
 
 	chai3d::cVector3d distance = cPosition - centerPoint;
 
 	if (distance.length() < (radius + cRadius)) {
-		force1 = distance;
-		force1.normalize();
+		force = distance;
+		force.normalize();
 
-		force1 = force1 * stiffness * (radius + cRadius - distance.length());
+		force = force * stiffness * (radius + cRadius - distance.length());
 	}
 	
-	if (type == magnetic)
-	{
-		if (distance.length() < (2 * radius + cRadius)) {
-			force2 = distance;
-			force2.normalize();
 
-			force2 += force2 * -300 * (distance.length() - 2 * radius + cRadius);
-		}
-	}
-
-	return force1 + force2;
+	return force;
 }
 
 Sphere::~Sphere()
