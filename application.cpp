@@ -161,6 +161,9 @@ int main(int argc, char* argv[])
     cout << "Keyboard Options:" << endl << endl;
     cout << "[f] - Enable/Disable full screen mode" << endl;
     cout << "[m] - Enable/Disable vertical mirroring" << endl;
+    cout << "[1] - Scene 1" << endl;
+    cout << "[2] - Scene 2" << endl;
+    cout << "[3] - Scene 3" << endl;
     cout << "[q] - Exit application" << endl;
     cout << endl << endl;
 
