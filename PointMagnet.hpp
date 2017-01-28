@@ -18,7 +18,7 @@ public:
   
   chai3d::cVector3d position;
 
-  PointMagnet(Entity* e, chai3d::cVector3d p, double pull);
+  PointMagnet(Sphere* e, chai3d::cVector3d p, double pull);
   ~PointMagnet();
 
   chai3d::cVector3d calculateAppliedForce(chai3d::cVector3d cPosition, double cRadius);

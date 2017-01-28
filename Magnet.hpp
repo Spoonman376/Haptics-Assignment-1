@@ -13,6 +13,7 @@
 #include "chai3d.h"
 #include <GLFW/glfw3.h>
 #include "Sphere.hpp"
+#include "Box.hpp"
 
 
 class Magnet

@@ -8,7 +8,7 @@
 
 #include "PointMagnet.hpp"
 
-PointMagnet::PointMagnet(Entity* e, chai3d::cVector3d p, double pull) : Magnet(e, pull)
+PointMagnet::PointMagnet(Sphere* e, chai3d::cVector3d p, double pull) : Magnet(e, pull)
 {
   position = p;
 }
@@ -24,11 +24,15 @@ chai3d::cVector3d PointMagnet::calculateAppliedForce(chai3d::cVector3d cPosition
   chai3d::cVector3d force = position - cPosition;
   double distance = force.length();
 
+  if (distance < 0.01) {
+    distance = 0.01;
+  }
+
   force.normalize();
 
-  force *= magneticForce / distance;
+  force *= magneticForce/ distance;
 
-  return force + Magnet::calculateAppliedForce(cPosition, cRadius);
+  return force + dynamic_cast<Sphere*>(form)->calculateAppliedForce(cPosition, cRadius);
 }
 
 

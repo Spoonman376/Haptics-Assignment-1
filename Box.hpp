@@ -48,7 +48,6 @@ public:
   ~Box();
 
   chai3d::cVector3d calculateAppliedForce(chai3d::cVector3d cursorPosition, double cursorRadius);
-  
 private:
   
   chai3d::cVector3d forceApplied(chai3d::cVector3d cursorPosition, double cursorRadius, Wall wall);

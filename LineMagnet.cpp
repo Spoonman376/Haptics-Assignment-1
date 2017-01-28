@@ -32,17 +32,28 @@ chai3d::cVector3d LineMagnet::calculateAppliedForce(chai3d::cVector3d cPosition,
   force.normalize();
   force *= magneticForce / distance;
 
+  if (form != nullptr) {
+    return force + dynamic_cast<Box*>(form)->calculateAppliedForce(cPosition, cRadius);
+  }
 
-  return force + Magnet::calculateAppliedForce(cPosition, cRadius);
+  return force;
+
 
 }
 
 chai3d::cVector3d LineMagnet::calculateClosestPoint(chai3d::cVector3d cPosition)
 {
-  chai3d::cVector3d n = (pointB - pointA);
-  n.cross(cPosition);
+  chai3d::cVector3d AB = (pointB - pointA);
+  double d = AB * (cPosition - pointA) / AB.lengthsq();
+  
+  if (d < 0) {
+    return pointA;
+  }
+  if (d > 1) {
+    return pointB;
+  }
 
-  return ((cPosition - pointA) * n) * n + cPosition;
+  return pointA + d * AB;
 }
 
 

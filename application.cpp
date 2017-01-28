@@ -11,6 +11,8 @@
 
 #include "Sphere.hpp"
 #include "box.hpp"
+#include "PointMagnet.hpp"
+#include "LineMagnet.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -41,6 +43,19 @@ bool mirroredDisplay = false;
 //------------------------------------------------------------------------------
 // DECLARED VARIABLES
 //------------------------------------------------------------------------------
+
+
+int sceneNumber;
+double cursorRadius = 0.01;
+bool sceneInitialized = false;
+
+Sphere* sphere = nullptr;
+Box* box = nullptr;
+
+PointMagnet* pointMagnet = nullptr;
+LineMagnet* lineMagnet = nullptr;
+
+cPrecisionClock timer;
 
 // a world that contains all objects of the virtual environment
 cWorld* world;
@@ -93,14 +108,6 @@ int swapInterval = 1;
 
 
 
-
-Sphere* sphere;
-Box* box;
-
-
-
-
-
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
 //------------------------------------------------------------------------------
@@ -123,6 +130,15 @@ void updateHaptics(void);
 // this function closes the application
 void close(void);
 
+
+void scene1Initialize(void);
+chai3d::cVector3d scene1(chai3d::cVector3d, double);
+
+void scene2Initialize(void);
+chai3d::cVector3d scene2(chai3d::cVector3d, double);
+
+void scene3Initialize(void);
+chai3d::cVector3d scene3(chai3d::cVector3d, double);
 
 //==============================================================================
 /*
@@ -269,21 +285,14 @@ int main(int argc, char* argv[])
     light->setDir(-1.0, -0.5, 0.0); 
 
     // create a sphere (cursor) to represent the haptic device
-    cursor = new cShapeSphere(0.01);
+    cursor = new cShapeSphere(cursorRadius);
 
     // insert cursor inside world
     world->addChild(cursor);
 
-	sphere = new Sphere(chai3d::cVector3d(0, 0, 0.03), 0.015, 3000);
-	world->addChild(sphere->mesh);
-
-  box = new Box(chai3d::cVector3d(-0.02, -0.02, -0.02), chai3d::cVector3d(0.04, 0.04, 0.04), 3000);
-  box->mesh->m_material->setBlueRoyal();
-  world->addChild(box->mesh);
-
-  
-
-
+    timer = cPrecisionClock();
+    scene1Initialize();
+ 
     //--------------------------------------------------------------------------
     // HAPTIC DEVICE
     //--------------------------------------------------------------------------
@@ -445,6 +454,15 @@ void keyCallback(GLFWwindow* a_window, int a_key, int a_scancode, int a_action, 
         mirroredDisplay = !mirroredDisplay;
         camera->setMirrorVertical(mirroredDisplay);
     }
+    else if (a_key == GLFW_KEY_1) {
+      scene1Initialize();
+    }
+    else if (a_key == GLFW_KEY_2) {
+      scene2Initialize();
+    }
+    else if (a_key == GLFW_KEY_3) {
+      scene3Initialize();
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -509,9 +527,6 @@ void updateHaptics(void)
     simulationRunning  = true;
     simulationFinished = false;
 
-	cPrecisionClock timer;
-	timer.start();
-
     // main haptic simulation loop
     while(simulationRunning)
     {
@@ -531,20 +546,37 @@ void updateHaptics(void)
         bool button = false;
         hapticDevice->getUserSwitch(0, button);
 
-
         // update position and orienation of cursor
 
         cursor->setLocalPos(position);
         cursor->setLocalRot(rotation);
 
-
         cVector3d force(0, 0, 0);
         cVector3d torque(0, 0, 0);
         double gripperForce = 0.0;
 
-        force += box->calculateAppliedForce(position, 0.01);
-        force += sphere->calculateAppliedForce(position, 0.01);
+        double time = timer.getCPUTimeSeconds();
 
+        if (sceneInitialized)
+        {
+          switch (sceneNumber)
+          {
+          case 1:
+            force += scene1(position, time);
+            break;
+
+          case 2:
+            force += scene2(position, time);
+            break;
+
+          case 3:
+            force += scene3(position, time);
+            break;
+
+          default:
+            break;
+          }
+        }
 
         /////////////////////////////////////////////////////////////////////
         // APPLY FORCES
@@ -562,3 +594,213 @@ void updateHaptics(void)
 }
 
 //------------------------------------------------------------------------------
+
+void scene1Initialize()
+{
+  sceneInitialized = false;
+
+  if (world->getNumChildren() > 0) {
+    world->clearAllChildren();
+  }
+
+  if (sphere != nullptr) {
+    delete sphere;
+    sphere = nullptr;
+  }
+
+  if (box != nullptr) {
+    delete box;
+    box = nullptr;
+  }
+
+  camera->set(cVector3d(0.2, 0.05, 0.05),    // camera position (eye)
+    cVector3d(0.0, 0.0, 0.0),    // look at position (target)
+    cVector3d(0.0, 0.0, 1.0));   // direction of the (up) vector
+
+
+  sphere = new Sphere(chai3d::cVector3d(0, 0, 0.03), 0.015, 10000);
+  box = new Box(chai3d::cVector3d(-0.02, -0.02, -0.02), chai3d::cVector3d(0.04, 0.04, 0.04), 5000);
+
+  world->addChild(cursor);
+  timer.reset();
+
+  world->addChild(sphere->mesh);
+
+  box->mesh->m_material->setBlueRoyal();
+  world->addChild(box->mesh);
+
+  sceneNumber = 1;
+
+  timer.start();
+
+  sceneInitialized = true;
+
+}
+
+chai3d::cVector3d scene1(chai3d::cVector3d position, double time)
+{
+  cVector3d force(0, 0, 0);
+
+  force += box->calculateAppliedForce(position, cursorRadius);
+  force += sphere->calculateAppliedForce(position, cursorRadius);
+
+  return force;
+}
+
+
+/*
+
+  Scene 2
+
+*/
+void scene2Initialize()
+{
+  sceneInitialized = false;
+
+  if (world->getNumChildren() > 0) {
+    world->clearAllChildren();
+  }
+  if (pointMagnet != nullptr) {
+    delete pointMagnet;
+    pointMagnet = nullptr;
+  }
+  if (lineMagnet != nullptr) {
+    delete lineMagnet;
+    lineMagnet = nullptr;
+  }
+  if (sphere != nullptr) {
+    delete sphere;
+    sphere = nullptr;
+  }
+  if (box != nullptr) {
+    delete box;
+    box = nullptr;
+  }
+
+  world->addChild(cursor);
+  timer.reset();
+
+  camera->set(cVector3d(0.2, 0.0, 0.05),    // camera position (eye)
+    cVector3d(0.0, 0.0, 0.0),    // look at position (target)
+    cVector3d(0.0, 0.0, 1.0));   // direction of the (up) vector
+
+  sphere = new Sphere(chai3d::cVector3d(0, 0, 0.04), 0.015, 10000);
+  pointMagnet = new PointMagnet(sphere, sphere->centerPoint, 0.1);
+  world->addChild(sphere->mesh);
+
+  box = new Box(chai3d::cVector3d(-0.01, -0.2, -0.045), chai3d::cVector3d(0.02, 0.4, 0.01), 10000);
+  lineMagnet = new LineMagnet(box, chai3d::cVector3d(0, -0.1, -0.04), chai3d::cVector3d(0, 0.1, -0.04), 0.1);
+  world->addChild(box->mesh);
+
+  sceneNumber = 2;
+
+  timer.start();
+
+  sceneInitialized = true;
+
+}
+
+chai3d::cVector3d scene2(chai3d::cVector3d position, double time)
+{
+  cVector3d force(0, 0, 0);
+
+  force += lineMagnet->calculateAppliedForce(position, cursorRadius);
+  force += pointMagnet->calculateAppliedForce(position, cursorRadius);
+
+  return force;
+}
+
+
+
+/*
+  Scene 3
+
+
+
+*/
+
+void scene3Initialize()
+{
+  sceneInitialized = false;
+
+  if (world->getNumChildren() > 0) {
+    world->clearAllChildren();
+  }
+
+  if (pointMagnet != nullptr) {
+    delete pointMagnet;
+    pointMagnet = nullptr;
+  }
+
+  if (lineMagnet != nullptr) {
+    delete lineMagnet;
+    lineMagnet = nullptr;
+  }
+
+  if (sphere != nullptr) {
+    delete sphere;
+    sphere = nullptr;
+  }
+
+  if (box != nullptr) {
+    delete box;
+    box = nullptr;
+  }
+
+  camera->set(cVector3d(0.2, 0.05, 0.05),    // camera position (eye)
+    cVector3d(0.0, 0.0, 0.0),    // look at position (target)
+    cVector3d(0.0, 0.0, 1.0));   // direction of the (up) vector
+
+  world->addChild(cursor);
+  timer.reset();
+
+  sphere = new Sphere(chai3d::cVector3d(0, 0, 0), 0.01, 10000);
+  pointMagnet = new PointMagnet(sphere, sphere->centerPoint, 0.1);
+  world->addChild(sphere->mesh);
+
+  box = new Box(chai3d::cVector3d(-0.01, -0.01, -0.01), chai3d::cVector3d(0.02, 0.02, 0.02), 8000);
+  world->addChild(box->mesh);
+
+  sceneNumber = 3;
+
+  timer.start();
+
+  sceneInitialized = true;
+
+}
+
+chai3d::cVector3d scene3(chai3d::cVector3d position, double time)
+{
+  cVector3d force(0, 0, 0);
+
+  chai3d::cVector3d newPosition = chai3d::cVector3d(0, 0, sin(time) * 0.06);
+  sphere->centerPoint = newPosition;
+  sphere->mesh->setLocalPos(newPosition);
+  pointMagnet->position = newPosition;
+
+  newPosition = chai3d::cVector3d(cos(time) * 0.04, sin(time) * 0.04, 0);
+  box->mesh->setLocalPos(newPosition);
+
+  newPosition += chai3d::cVector3d(-0.01, -0.01, -0.01);
+  box->pointLFB = newPosition;
+
+  force += pointMagnet->calculateAppliedForce(position, cursorRadius);
+  force += box->calculateAppliedForce(position, cursorRadius);
+
+  return force;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

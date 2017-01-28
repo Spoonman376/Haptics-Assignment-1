@@ -17,14 +17,12 @@ Magnet::Magnet(Entity* f, double mF)
 
 Magnet::~Magnet()
 {
-  if (form != nullptr)
-    delete form;
 }
 
 chai3d::cVector3d Magnet::calculateAppliedForce(chai3d::cVector3d cPosition, double cRadius)
 {
   if (form != nullptr) {
-    return form->calculateAppliedForce(cPosition, cRadius);
+    return  form->calculateAppliedForce(cPosition, cRadius);
   }
   else {
     return chai3d::cVector3d(0, 0, 0);
